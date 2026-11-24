@@ -164,8 +164,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3781afe7820bef745bc0153bda83b5fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
+  cameraTransform: {fileID: 330585546}
   moveSpeed: 15
   rotateSpeed: 50
+  zoom: 12
+  zoomSpeed: 1
+  minZoom: 5
+  maxZoom: 60
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0

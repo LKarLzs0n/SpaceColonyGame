@@ -3,15 +3,25 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
+    
+    [SerializeField] private Transform cameraTransform;
 
+    [Header("Cam Movement")]
     [SerializeField] private float moveSpeed = 15f;
     [SerializeField] private float rotateSpeed = 50f;
+    [SerializeField] private float zoom = 12f;
+    [SerializeField] private float zoomSpeed = 1f;
+    [SerializeField] private float minZoom = 5f;
+    [SerializeField] private float maxZoom = 60f;
+    
+    
 
     // Update is called once per frame
     void Update()
     {
         HandleMovement();
         HandleRotation();
+        HandleZoom();
     }
 
     void HandleMovement()
@@ -41,5 +51,17 @@ public class CameraController : MonoBehaviour
         {
             transform.Rotate(0f, -rotateSpeed * Time.deltaTime, 0f);
         }
+    }
+    
+    void HandleZoom()
+    {
+        float scroll = Mouse.current.scroll.ReadValue().y;
+
+        scroll *= zoomSpeed;
+        
+        zoom -= scroll;
+        
+        zoom = Mathf.Clamp(zoom, minZoom, maxZoom);
+        cameraTransform.localPosition = new Vector3(0f, zoom, -zoom);
     }
 }
