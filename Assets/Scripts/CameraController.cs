@@ -13,13 +13,20 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float zoomSpeed = 1f;
     [SerializeField] private float minZoom = 5f;
     [SerializeField] private float maxZoom = 60f;
+
+    private Vector3 targetPosition;
     
     
     [Header("Smoothing")]
+    [SerializeField] float moveSmoothing = 10f;
     [SerializeField] private float targetZoom = 12f;
     [SerializeField] private float zoomSmoothing = 8f;
-    
 
+
+    void Start()
+    {
+        targetPosition = transform.position;
+    }
     // Update is called once per frame
     void Update()
     {
@@ -41,7 +48,9 @@ public class CameraController : MonoBehaviour
         
         Vector3 direction = transform.forward * input.z + transform.right * input.x;
         
-        transform.position += direction * (moveSpeed * Time.deltaTime);
+        targetPosition += direction * (moveSpeed * Time.deltaTime);
+        
+        transform.position = Vector3.Lerp(transform.position, targetPosition, moveSmoothing * Time.deltaTime);
     }
 
     void HandleRotation()
