@@ -16,85 +16,118 @@
 
 ## The game
 A **cozy space colony builder** in Unity (C#, URP), built on **real-life science**: real ores, real chemistry, real astrophysics. It should make sense.
-- You grow a tiny neon town on an asteroid at your own pace, upgrade every building, and feed the giant ring in its centre.
+- **A living town.** Tiny people walk, carry and work, and every building feeds the next one. What I love most in city builders: how every building works together, and watching small people walk around the town and work.
+- You grow a neon town on an asteroid at your own pace, upgrade every building, and build the giant ring in its centre.
 - **Goal: build a Kugelblitz**, a black hole made out of light, with a ring of lasers in the middle of the colony. Tagline idea: "Build a black hole out of light."
 - **Not an RTS.** No armies, no combat, no timers, no way to lose. Just the city-building part.
+- **Dropped on 2026-11-24 (don't bring back):** colonist classes that level up, and a research tree (the periodic-table "Element Board"). I want buildings working together, not upgrading people.
 - Inspired by cozy city builders (Let Them Trade), Minecraft Mekanism and my own Minecraft mod **Event Horizon**.
 
 ## The vibe
 - **Futuristic Tokyo floating in space. Always night.** Narrow stacked buildings, warm lit windows, neon signs, steam vents.
-- Light comes in three colours: warm amber, neon pink, neon cyan. One bright accent per building. Bloom on.
+- **The 3 key references live in `_References/`** (git-ignored: other people's images, never post them). What they have in common, and what every building should carry:
+  - **Tight, tall, blocky complexes** packed together like a back alley; dark, grimy walls (near-black blue/purple).
+  - **Stacked neon signs** hanging off walls, vertical sign boards with glyphs, lots of them. Upgrades add floors AND signs.
+  - **Cables and pipes strung between buildings**, AC units, vents, clutter.
+  - **Steam and haze** drifting through, colour fog in the distance.
+  - **Wet, glossy ground** that reflects the neon.
+  - Neon colours: **pink/magenta, cyan, green, warm amber/yellow**, on a dark base. Bloom on.
+- Our own signs and glyphs only: no copied logos or characters (ref 2 has fan art in it).
+- **Rain over the floating city.** The town sits under a clear dome (it needs air anyway); its own water cycle (ice drills, farms) condenses on the glass and rains back down. The first rain is a reward (ring part 2).
+- **The little people:** tiny blocky Blockbench figures; code swings their arms and legs like Minecraft mobs, so no hand animation. Each carries a **tiny lantern**: zoomed out, glowing dots flow between the buildings.
 - Sky: stars, a nebula, 1–3 **planets built in code** that slowly turn.
-- Smooth and dreamy: the camera eases, nothing snaps, soft ambient music, quiet UI.
+- Smooth and dreamy: the camera eases, nothing snaps, soft cozy music, quiet UI.
 - **Camera:** angled top-down. WASD pan, scroll zoom, Q/E rotate. Zoomed far out, the colony is one glowing speck in the dark.
 
-## Core loop
-Houses bring colonists → colonists work production buildings → everything goes into **one shared stockpile** → spend it on: building and upgrading, exporting through the mass driver (credits → research), or feeding the ring.
-- **No conveyors.** Buildings put output straight into the stockpile and take input from it.
-- Buildings cost **materials**. Credits only buy **research** (the periodic table is the tech tree).
-- If something runs short, buildings just pause. Nothing breaks.
+## How the town works (core loop)
+1. Houses give colonists. Each colonist gets a job at a building with a free worker slot.
+2. Workers **walk** (NavMesh) from home to work.
+3. **Producers** (mines, ice drill, farm): work → carry the output to the nearest **storage depot** → repeat.
+4. **Processors** (smelter, wire mill, ...): walk to the depot, pick up the inputs → carry them back → work → carry the output to the depot.
+5. The **stockpile** = everything in the depots. Building and upgrading spend from it.
+6. Workers carry materials to the **ring** to build it.
+- **The layout is the cozy puzzle:** short walks = a faster town. Mines near depots, houses near work, so the town packs into tight alleys on its own.
+- **No conveyors.** If something runs short, workers wait and buildings pause. Nothing breaks, nobody leaves.
+- **Food:** farms → depot; colonists eat from the stockpile; no food = no new colonists. **Power:** generators add to one number; buildings past the first few use it.
 
-## Buildings
-- Every building has **3 levels**, and each level is its own Blockbench model (small → bigger → glowing neon). Upgrades are the main reward.
-- Starter set: landing pod, capsule house, hydroponics farm, ice drill, iron mine, carbon pit, smelter (my furnace model), copper mine, wire mill, generator, storage depot, mass driver, research lab. Plus decor: neon signs, lanterns, vending machines, noodle stand.
-- **Grid:** 1 cell = 4×4 Minecraft blocks (64×64 Blockbench units). Buildings take whole cells (1×1, 2×2, 3×2). Same scale for every model, pivot at the bottom centre, export as **FBX**, textures with Filter Mode Point + no compression.
+## Buildings (February build)
+- Every building has **3 levels**, and each level is its own Blockbench model (small → bigger → glowing neon). Upgrading = more worker slots and faster work. Upgrades are the main reward.
+- **From the start:** landing pod, capsule house, storage depot, ice drill, hydroponics farm, iron mine, carbon pit, smelter (my furnace model), copper mine, wire mill, generator.
+- **Unlocked by ring part 1:** steel mill, motor works.
+- **Unlocked by ring part 2:** quartz quarry, arc furnace, chip fab.
+- **Decor (vibe only):** neon signs, paper lanterns, vending machines, noodle stand, utility poles with tangled cables.
+- **After February:** mass driver (trade), research lab.
+- **Modelling order:** level 1 of every building first (in the order above), then all the level 2s, then the level 3s. Same footprint for all 3 levels: they grow up, never out. Reserve 4 Minecraft blocks only for neon (pink, cyan, green, amber) so exactly those can glow in Unity.
+- **Grid: fine and invisible (decided 2026-11-24).** 1 cell = **1 Minecraft block** (16 Blockbench units = 1 Unity unit; check the FBX import scale), so placing feels almost free but voxel buildings always line up, pixel edge to pixel edge. Footprints can be any whole number of blocks (a 5×7 noodle shop is fine). The grid only shows while placing. Buildings rotate in 90° steps (R key; Q/E is the camera). The ghost glides to the snapped spot with `Lerp`, so snapping feels free. Decor (signs, cables, lanterns, steam) hangs over the edges to break up the boxes. Not fully free placement: voxel buildings at odd angles clash, and tight alleys need buildings flush.
+- Same scale for every model, pivot at the bottom centre, export as **FBX**, textures with Filter Mode Point + no compression.
 
-## The ring (6 stages + ignition)
-1. Foundation (iron plates, copper wire) — must finish within ~10 minutes
-2. Laser mounts (steel, motors)
-3. Emitters (circuits, wire): the first test pulse ← **the February build ends here**
-4. Capacitor bank · 5. Cryo cooling · 6. Star feed (Dyson swarm) · Ignition → updates after February.
+**The chains (real science):**
+- Ice → water; water + power → food (grow lights really glow pink)
+- Iron ore (hematite) + carbon → iron, in the smelter (carbon steals the oxygen: a real blast furnace)
+- Copper ore (chalcopyrite) → copper, in the smelter (each smelter is set to iron or copper); copper → wire
+- Iron + carbon → steel; steel + wire → motors
+- Quartz + carbon → silicon (arc furnace); silicon + wire → circuits
+- Carbon → power (generator)
+
+## The ring (3 parts for February)
+The big build in the town centre, like a Wonder. Workers carry materials to it. Each finished part changes how it looks and sounds, and unlocks new buildings.
+1. **The base** (iron + copper wire): the floor lights up, a soft beat joins the music. Must finish within ~10 minutes.
+2. **The laser towers** (steel + motors): the towers rise, the dome seals, **the first rain falls**.
+3. **The first flash of light** (circuits + wire): a test pulse lights the sky, then fizzles. ← **the February build ends here**
+- After February: capacitor bank, cryo cooling, star feed (Dyson swarm), ignition.
 
 ## Code architecture
 **Data (ScriptableObjects), so new content needs no new code:**
-- `ResourceData`: name, icon, export price
-- `BuildingData`: name, grid size, and per level: model, build cost, workers, power, inputs/outputs per cycle
+- `ResourceData`: name, icon
+- `BuildingData`: name, grid size, unlocked by (ring part), and per level: model, build cost, worker slots, power, inputs/outputs per cycle, work time
 
 **Scripts, in the order I'll write them:**
-1. `CameraController`: pan, zoom, rotate, smooth easing
-2. `GridManager`: mouse → grid cell, free/occupied cells (`Dictionary<Vector2Int, GameObject>`)
+1. `CameraController`: pan, zoom, rotate, smooth easing ✓
+2. `GridManager`: mouse → grid cell, free/occupied cells (`Dictionary<Vector2Int, GameObject>`). A cell is one block; a building fills every cell under its footprint.
 3. `BuildManager`: pick a building, ghost preview, place if affordable
 4. `Stockpile`: amounts of each resource, fires an event when it changes (for UI)
-5. `Building` (base class): level, upgrade, pause when short of workers/power
-6. `ProductionBuilding`: every few seconds take inputs, add outputs
+5. `Building` (base class): level, upgrade, worker slots, pause when short
+6. `ProductionBuilding`: inputs → work time → outputs (first on a plain timer, before workers exist)
 7. `House`: adds colonist space
-8. `ColonyManager`: colonists, food, assigning workers
-9. `RingProject`: ring stages and what changes when each is done
-10. `ResearchManager`: credits and unlocks
+8. `ColonyManager`: colonists, food, gives each colonist a job
+9. **`Worker`: the heart of the game.** A `NavMeshAgent` + a state machine (walk to work → work → carry to depot → fetch inputs → ...), the code limb swing and the lantern. I've built state machines + NavMesh before in an RTS, so build on that.
+10. `RingProject`: the 3 parts, takes deliveries, what changes when each is done, unlocks
 11. `PlanetVisual`: a code-built planet that slowly turns
 - UI: resource bar, build menu, building info panel
 
 ## Week by week
-1. Nov 24–30: the camera (rig: pan, rotate, zoom), then grid + placing a cube ← **current**
+1. Nov 24–30: the camera ✓, then grid + placing a cube ← **current**
 2. Dec 1–7: `BuildingData`, real models, ghost preview, costs
-3. Dec 8–14: stockpile, mines + smelter producing, resource bar
-4. Dec 15–21: houses, colonists, workers, food
-5. Dec 22 – Jan 4 (holidays, lighter): upgrades, build menu
-6. Jan 5–11: the ring, stages 1–3
-7. Jan 12–18: power, mass driver credits, research
-8. Jan 19–25: vibe pass (lighting, bloom, neon, code planets, sound)
-9. Jan 26 – Feb 1: save/load, friends playtest, tuning
+3. Dec 8–14: stockpile, production buildings on a timer (no workers yet), resource bar
+4. Dec 15–21: houses, colonists, **workers**: NavMesh walking + the state machine (to work, work, carry to the depot)
+5. Dec 22 – Jan 4 (holidays, lighter): processors fetching inputs (the chains), upgrades, build menu
+6. Jan 5–11: the ring: 3 parts, workers deliver to it, unlocks
+7. Jan 12–18: food + power, the little people's look (blocky figures, limb swing, lanterns)
+8. Jan 19–25: vibe pass (lighting, bloom, neon, rain, code planets, music)
+9. Jan 26 – Feb 1: save/load, friends playtest, tuning (ring part 1 under 10 minutes)
 10. Feb 2–6: polish, build, itch page, last devlog, submit
-Stretch only if ahead: drones, shuttles landing with colonists, one captured planet.
+Stretch only if ahead: drones, shuttles landing with colonists, mass driver trade.
 
 ## Current task details
-**CameraController** (on an empty `CameraRig` at ground level, Main Camera as its child at (0, 12, -12), rotated 45° down).
-- Pan with WASD: move the rig along its own `transform.forward` / `transform.right`, times speed and `Time.deltaTime`.
-- Rotate with Q/E: `transform.Rotate` around Y.
-- Then zoom with the scroll wheel (slide the camera along its own forward, clamped), then smoothing for the dreamy feel.
-- This project uses the **new Input System only** (`activeInputHandler: 1`): use `using UnityEngine.InputSystem;` and `Keyboard.current` / `Mouse.current`. The old `Input.GetKey` throws errors here.
+**GridManager:** mouse click → grid cell → spawn a cube snapped to that cell.
+Hints: raycast from the camera through the mouse to the ground, round the hit position to the grid with `Mathf.Floor`, store occupied cells in a dictionary.
+- `cellSize` = 1 (one Minecraft block). Start with a plain 1×1 cube; bigger footprints, rotation and the gliding ghost come with `BuildManager`.
+- Later, for footprints: a building whose corner cell is (x, z) and size is w × d sits at (x + w/2, 0, z + d/2), because its pivot is the bottom centre. A 90° turn swaps w and d.
+- This project uses the **new Input System only** (`activeInputHandler: 1`): use `using UnityEngine.InputSystem;` and `Keyboard.current` / `Mouse.current` (mouse position: `Mouse.current.position.ReadValue()`). The old `Input.GetKey` throws errors here.
+- Scroll gives exactly +1 / -1 per notch for one frame (no `Time.deltaTime` for scroll).
 
-**After the camera:** GridManager: mouse click → grid cell → spawn a cube snapped to that cell. Hints: raycast from the camera to the ground, round the hit position to the grid with `Mathf.Floor`, store occupied cells in a dictionary.
+**Camera (done):** `CameraController` on an empty `CameraRig` at ground level; Main Camera is its child. Pan (WASD, normalized) and zoom (scroll) both use target + `Lerp` smoothing; Q/E rotate the rig; zoom sets the camera's `localPosition` to (0, zoom, -zoom). Later polish: pan speed scaling with zoom, smoothed rotation, and **street-level tilt**: the closer you zoom, the flatter the camera angle (45° far out → ~15° fully in), so zooming in turns into the reference alley shots.
 
 ## Notes and gotchas
 - **Lunar Client saves Minecraft structures to `~\.lunarclient\profiles\cf\saves\<world>\generated\minecraft\structure\`**, not `.minecraft`. Copy them over (or teach my converter that folder).
 - Minecraft-converted models come in as **one object per block with every face** (furnacev3.fbx = 1,216 cubes, ~14.6k triangles). Later task: merge into one mesh and skip faces touching another block, in my converter.
+- **Save/load (week 9):** save the buildings, levels and stockpile only. On load, workers just restart their loop; never try to save a worker halfway through a walk.
 
 ## Planning docs
 - Core Game Plan (current): https://claude.ai/artifact/QFXMZMtB2Z7NbGXHbjszdV
-- Kugelblitz Field Manual (the path to the ring): https://claude.ai/artifact/DXvF5TVmeGYxhT3n5goWDP
+- Kugelblitz Field Manual (the path to the ring, old factory version; the science still holds): https://claude.ai/artifact/DXvF5TVmeGYxhT3n5goWDP
 - Machine Map (old factory version, real-science chain still useful): https://claude.ai/artifact/UDLtQwbyotyhK2A6To7TPj
 
 ## Progress log
 (Update this section at the end of each session: what got done, what's next.)
-- **2026-11-24:** Planned the game and pivoted from factory tycoon to cozy space colony builder. Modelled the furnace (v3, final) in Minecraft, painted and exported it to FBX. No code yet. **Next:** make the Unity project (Unity 6 URP, Hackatime in the code editor, Git + Unity `.gitignore`), then GridManager: a cube snapping to the grid.
+- **2026-11-24:** Planned the game and pivoted from factory tycoon to cozy space colony builder. Modelled the furnace (v3, final) in Minecraft, painted and exported it to FBX. No code yet. Then: made the Unity project `SpaceColonyGame` (6000.5.6f1, URP), Git + GitHub repo (public: https://github.com/LKarLzs0n/SpaceColonyGame), and wrote **CameraController**: WASD pan (normalized, smoothed), Q/E rotate, scroll zoom (smoothed, clamped). Learned: camera rig, `position` vs `localPosition`, `Time.deltaTime`, `normalized`, `Mathf.Clamp`, `Lerp` for ease-out. Posted devlog #1 on Hack Club (Build Mode pipeline screenshot + camera clip). Later the same day, the design became **a living town**: little people walk, carry and work (NavMesh + a worker state machine), every building feeds the next through storage depots, and the ring is a 3-part Wonder that unlocks new buildings. Classes and research were dropped; rain under the dome was added. **Next:** GridManager: a cube snapping to the grid.

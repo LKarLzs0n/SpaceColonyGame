@@ -56,5 +56,8 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+# Mood references (other people's images, never upload)
+/_References/
+
 # Claude Code local settings
 .claude/settings.local.json
