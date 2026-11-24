@@ -19,30 +19,58 @@ public class GridManager : MonoBehaviour
         {
             PlaceCube();
         }
+
+        if (Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            RemoveCube();
+        }
     }
 
     void PlaceCube()
     {
-        
-        Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        
-        RaycastHit hit;
-        if (!Physics.Raycast(ray, out hit)) return;
-        
-        int x = Mathf.FloorToInt(hit.point.x / cellSize);
-        int z = Mathf.FloorToInt(hit.point.z / cellSize);
-        Vector2Int cell = new Vector2Int(x, z);
+
+        if (!TryGetMouseCell(out Vector2Int cell)) return;
 
         if (occupiedCells.ContainsKey(cell)) return;
-
-        Vector3 position = new Vector3(
-            x * cellSize + cellSize / 2f,
-            cellSize / 2f,
-            z * cellSize + cellSize / 2f);
+        
+        Vector3 position = GetCellCenter(cell);
         
         GameObject cube = Instantiate(cubePrefab, position, Quaternion.identity);
         occupiedCells.Add(cell, cube);
 
+    }
+
+    void RemoveCube()
+    {
+        if (!TryGetMouseCell(out Vector2Int cell)) return;
+        if (occupiedCells.TryGetValue(cell, out GameObject cube))
+        {
+            Destroy(cube);
+            occupiedCells.Remove(cell);
+        }
+    }
+
+    public Vector3 GetCellCenter(Vector2Int cell)
+    {
+        return new Vector3(
+            cell.x * cellSize + cellSize / 2f,
+            cellSize / 2f,
+            cell.y * cellSize + cellSize / 2f);
+    }
+
+    public bool TryGetMouseCell(out Vector2Int cell)
+    {
+        Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+        
+        RaycastHit hit;
+        if (!Physics.Raycast(ray, out hit)) { cell = default; return false; }
+
+        Vector3 point = hit.point - hit.normal * 0.01f;
+        
+        int x = Mathf.FloorToInt(point.x / cellSize);
+        int z = Mathf.FloorToInt(point.z / cellSize);
+        cell = new Vector2Int(x, z);
+        return true;
     }
     
 }

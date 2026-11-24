@@ -96,8 +96,8 @@ The big build in the town centre, like a Wonder. Workers carry materials to it. 
 - UI: resource bar, build menu, building info panel
 
 ## Week by week
-1. Nov 24–30: the camera ✓, then grid + placing a cube ← **current**
-2. Dec 1–7: `BuildingData`, real models, ghost preview, costs
+1. Nov 24–30: the camera ✓, grid + placing/removing cubes ✓ (both done on day 1, ahead of schedule)
+2. Dec 1–7: `BuildingData`, real models, ghost preview, costs ← **current** (started early)
 3. Dec 8–14: stockpile, production buildings on a timer (no workers yet), resource bar
 4. Dec 15–21: houses, colonists, **workers**: NavMesh walking + the state machine (to work, work, carry to the depot)
 5. Dec 22 – Jan 4 (holidays, lighter): processors fetching inputs (the chains), upgrades, build menu
@@ -109,10 +109,12 @@ The big build in the town centre, like a Wonder. Workers carry materials to it. 
 Stretch only if ahead: drones, shuttles landing with colonists, mass driver trade.
 
 ## Current task details
-**GridManager:** mouse click → grid cell → spawn a cube snapped to that cell.
-Hints: raycast from the camera through the mouse to the ground, round the hit position to the grid with `Mathf.Floor`, store occupied cells in a dictionary.
-- `cellSize` = 1 (one Minecraft block). Start with a plain 1×1 cube; bigger footprints, rotation and the gliding ghost come with `BuildManager`.
+**Next (first task of the next session): move placing into `BuildManager`.** `GridManager` should only answer "where" and keep track of which cells are taken; `BuildManager` decides "what to build". So the click handling, `Instantiate` and `Destroy` move to `BuildManager`, and `GridManager` gets small public methods for the cells (e.g. is a cell free, mark it taken, free it). After that: `BuildingData` + the furnace model on the grid with a real footprint.
 - Later, for footprints: a building whose corner cell is (x, z) and size is w × d sits at (x + w/2, 0, z + d/2), because its pivot is the bottom centre. A 90° turn swaps w and d.
+
+**Ghost preview (done):** a `Ghost` cube lives in the scene (transparent URP `GhostMat`, **no collider** so the mouse ray ignores it, scale 1.02 against flicker, no shadows). `BuildManager.Update` asks `gridManager.TryGetMouseCell`; if it hits, the ghost shows and `Lerp`s to `gridManager.GetCellCenter(cell)` (`ghostSmoothing` 15), else `SetActive(false)`. `TryGetMouseCell` and `GetCellCenter` are public on `GridManager`; `PlaceCube` uses `GetCellCenter` too.
+
+**GridManager (done):** `TryGetMouseCell(out Vector2Int cell)` raycasts from the camera through the mouse, nudges the hit point back along `hit.normal` by 0.01 (so clicks on a cube's side land in that cube's cell), and `Mathf.FloorToInt`s it into a cell. `cellSize` = 1 (one Minecraft block). Left click → `PlaceCube` (skips taken cells, spawns at the cell centre, `Add`s to `Dictionary<Vector2Int, GameObject>`); right click → `RemoveCell` (`TryGetValue` → `Destroy` + `Remove`).
 - This project uses the **new Input System only** (`activeInputHandler: 1`): use `using UnityEngine.InputSystem;` and `Keyboard.current` / `Mouse.current` (mouse position: `Mouse.current.position.ReadValue()`). The old `Input.GetKey` throws errors here.
 - Scroll gives exactly +1 / -1 per notch for one frame (no `Time.deltaTime` for scroll).
 
@@ -130,4 +132,4 @@ Hints: raycast from the camera through the mouse to the ground, round the hit po
 
 ## Progress log
 (Update this section at the end of each session: what got done, what's next.)
-- **2026-11-24:** Planned the game and pivoted from factory tycoon to cozy space colony builder. Modelled the furnace (v3, final) in Minecraft, painted and exported it to FBX. No code yet. Then: made the Unity project `SpaceColonyGame` (6000.5.6f1, URP), Git + GitHub repo (public: https://github.com/LKarLzs0n/SpaceColonyGame), and wrote **CameraController**: WASD pan (normalized, smoothed), Q/E rotate, scroll zoom (smoothed, clamped). Learned: camera rig, `position` vs `localPosition`, `Time.deltaTime`, `normalized`, `Mathf.Clamp`, `Lerp` for ease-out. Posted devlog #1 on Hack Club (Build Mode pipeline screenshot + camera clip). Later the same day, the design became **a living town**: little people walk, carry and work (NavMesh + a worker state machine), every building feeds the next through storage depots, and the ring is a 3-part Wonder that unlocks new buildings. Classes and research were dropped; rain under the dome was added. **Next:** GridManager: a cube snapping to the grid.
+- **2026-11-24:** Planned the game and pivoted from factory tycoon to cozy space colony builder. Modelled the furnace (v3, final) in Minecraft, painted and exported it to FBX. No code yet. Then: made the Unity project `SpaceColonyGame` (6000.5.6f1, URP), Git + GitHub repo (public: https://github.com/LKarLzs0n/SpaceColonyGame), and wrote **CameraController**: WASD pan (normalized, smoothed), Q/E rotate, scroll zoom (smoothed, clamped). Learned: camera rig, `position` vs `localPosition`, `Time.deltaTime`, `normalized`, `Mathf.Clamp`, `Lerp` for ease-out. Posted devlog #1 on Hack Club (Build Mode pipeline screenshot + camera clip). Later the same day, the design became **a living town**: little people walk, carry and work (NavMesh + a worker state machine), every building feeds the next through storage depots, and the ring is a 3-part Wonder that unlocks new buildings. Classes and research were dropped; rain under the dome was added. The grid became fine and invisible (1 cell = 1 block). Then wrote **GridManager**: click to place cubes snapped to the grid, right-click to remove, side clicks fixed. Learned: raycasts, `out` parameters and the `TryGet` pattern, early `return`, `Dictionary` (`Add`, `ContainsKey`, `TryGetValue`, `Remove`), `Mathf.FloorToInt` vs `(int)` on negatives, `hit.normal`, and the if-without-braces trap. Then started **BuildManager**: a see-through ghost cube glides to the cell under the mouse. Learned: one script calling another (`public` methods + a `[SerializeField]` script slot), returning a value from a method, `SetActive`, a transparent URP material, and why visuals shouldn't have colliders. **Next:** move placing into `BuildManager` (see Current task details), then `BuildingData` + the furnace on the grid.
