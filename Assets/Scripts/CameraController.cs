@@ -15,6 +15,10 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float maxZoom = 60f;
     
     
+    [Header("Smoothing")]
+    [SerializeField] private float targetZoom = 12f;
+    [SerializeField] private float zoomSmoothing = 8f;
+    
 
     // Update is called once per frame
     void Update()
@@ -59,9 +63,10 @@ public class CameraController : MonoBehaviour
 
         scroll *= zoomSpeed;
         
-        zoom -= scroll;
+        targetZoom -= scroll;
         
-        zoom = Mathf.Clamp(zoom, minZoom, maxZoom);
+        targetZoom = Mathf.Clamp(targetZoom, minZoom, maxZoom);
+        zoom = Mathf.Lerp(zoom, targetZoom, zoomSmoothing * Time.deltaTime);
         cameraTransform.localPosition = new Vector3(0f, zoom, -zoom);
     }
 }

@@ -171,6 +171,8 @@ MonoBehaviour:
   zoomSpeed: 1
   minZoom: 5
   maxZoom: 60
+  targetZoom: 12
+  zoomSmoothing: 8
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
