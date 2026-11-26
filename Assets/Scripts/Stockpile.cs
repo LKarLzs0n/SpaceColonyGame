@@ -7,6 +7,8 @@ public class Stockpile : MonoBehaviour
     
     private Dictionary<ResourceData, int> amounts = new Dictionary<ResourceData, int>();
 
+    private List<StorageDepot> depots = new List<StorageDepot>();
+    
     [SerializeField] private ResourceData[] debugResources;
     
     public int GetAmount(ResourceData resource)
@@ -16,6 +18,29 @@ public class Stockpile : MonoBehaviour
             return amount;
         }
         return 0;
+    }
+    
+    public void AddDepot(StorageDepot depot) {depots.Add(depot);}
+    
+    public void RemoveDepot(StorageDepot depot) {depots.Remove(depot);}
+
+    public StorageDepot GetNearestDepot(Vector3 from)
+    {
+        StorageDepot nearest = null;
+
+        float nearestDistance = Mathf.Infinity;
+        
+        foreach (StorageDepot depot in depots)
+        {
+            float distance = Vector3.Distance(from, depot.transform.position);
+            
+            if (distance < nearestDistance)
+            {
+                nearest = depot;
+                nearestDistance = distance;
+            }
+        }
+        return nearest;
     }
 
     public void Add(ResourceData resource, int amount)

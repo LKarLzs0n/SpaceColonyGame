@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 public class BuildManager : MonoBehaviour
 {
+    [SerializeField] private ColonyManager colony;
     [SerializeField] private Stockpile stockpile;
     [SerializeField] private GridManager gridManager;
     [SerializeField] private Transform ghost;
@@ -35,6 +36,7 @@ public class BuildManager : MonoBehaviour
         Building b = building.GetComponent<Building>();
         b.data = selectedBuilding;
         b.stockpile = stockpile;
+        b.colony = colony;
         b.corner = cell;
         b.size = size;
         gridManager.OccupyArea(cell, size, building);
