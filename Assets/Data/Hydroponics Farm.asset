@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 855fd6135e1f01f47ba794b4871b8c23, type: 3}
+  m_Name: Hydroponics Farm
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingData
+  buildingName: Hydroponics Farm
+  size: {x: 3, y: 3}
+  color: {r: 0.2028302, g: 1, b: 0.20843497, a: 1}
+  cost:
+  - resource: {fileID: 11400000, guid: b36a230677e745043ae4e54f461c9394, type: 2}
+    amount: 10
+  - resource: {fileID: 11400000, guid: 5e5dc70652ce56f4e9555cdcdaae38cf, type: 2}
+    amount: 5
+  prefab: {fileID: 5242068169708488786, guid: dda48cac244b4d8469d6aa871f671607, type: 3}
+  workTime: 5
+  input:
+  - resource: {fileID: 11400000, guid: a62f7aa19e0a52f4db55e6681ae059f5, type: 2}
+    amount: 2
+  output:
+  - resource: {fileID: 11400000, guid: 05ff955e04a10144e9a3140709cc6210, type: 2}
+    amount: 1

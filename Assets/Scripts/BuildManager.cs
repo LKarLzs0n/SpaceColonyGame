@@ -3,15 +3,14 @@ using UnityEngine.InputSystem;
 
 public class BuildManager : MonoBehaviour
 {
-    
+    [SerializeField] private Stockpile stockpile;
     [SerializeField] private GridManager gridManager;
     [SerializeField] private Transform ghost;
     [SerializeField] private float ghostSmoothing = 15f;
-    [SerializeField] private GameObject buildingPrefab;
 
     private BuildingData selectedBuilding;
     [SerializeField] private BuildingData[] buildingCards;
-
+    
     private int rotationSteps;
 
     void Start()
@@ -25,17 +24,21 @@ public class BuildManager : MonoBehaviour
         
         if (!gridManager.IsAreaFree(cell, size)) return;
         
+        if (!stockpile.CanAfford(selectedBuilding.cost)) return;
+        
         Vector3 position = gridManager.GetFootprintCenter(cell, size);
         
-        GameObject building = Instantiate(buildingPrefab, position, GetRotation());
+        GameObject building = Instantiate(selectedBuilding.prefab, position, GetRotation());
         building.name = selectedBuilding.buildingName;
         building.transform.localScale = new Vector3(selectedBuilding.size.x, 1f, selectedBuilding.size.y);
         building.GetComponent<Renderer>().material.color = selectedBuilding.color;
         Building b = building.GetComponent<Building>();
         b.data = selectedBuilding;
+        b.stockpile = stockpile;
         b.corner = cell;
         b.size = size;
         gridManager.OccupyArea(cell, size, building);
+        stockpile.Spend(selectedBuilding.cost);
     }
 
     void RemoveBuilding(Vector2Int cell)
@@ -44,6 +47,7 @@ public class BuildManager : MonoBehaviour
         {
             Building b = building.GetComponent<Building>();
             gridManager.FreeArea(b.corner, b.size);
+            stockpile.AddAll(b.data.cost);
             Destroy(building);
         }
     }
@@ -93,6 +97,11 @@ public class BuildManager : MonoBehaviour
         if (Keyboard.current.digit3Key.wasPressedThisFrame)
         {
             SelectBuilding(2);
+        }
+
+        if (Keyboard.current.digit4Key.wasPressedThisFrame)
+        {
+            SelectBuilding(3);
         }
         
         

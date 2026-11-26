@@ -874,6 +874,54 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1218234830}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1585739137
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1585739138}
+  - component: {fileID: 1585739139}
+  m_Layer: 0
+  m_Name: Stockpile
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1585739138
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585739137}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.62803, y: -0, z: 1.14123}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1585739139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585739137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4af3ee5c45c95dc4c8fb1af7e6eb56f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Stockpile
+  debugResources:
+  - {fileID: 11400000, guid: b36a230677e745043ae4e54f461c9394, type: 2}
+  - {fileID: 11400000, guid: 5e5dc70652ce56f4e9555cdcdaae38cf, type: 2}
+  - {fileID: 11400000, guid: a62f7aa19e0a52f4db55e6681ae059f5, type: 2}
 --- !u!1 &1729078089
 GameObject:
   m_ObjectHideFlags: 0
@@ -1030,14 +1078,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b0885e67c15c104aade775052c475b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildManager
+  stockpile: {fileID: 1585739139}
   gridManager: {fileID: 488956346}
   ghost: {fileID: 3483358420245867946}
   ghostSmoothing: 15
-  buildingPrefab: {fileID: 5242068169708488786, guid: f8361b7d6c96dc245b6194549292acb9, type: 3}
   buildingCards:
   - {fileID: 11400000, guid: 59c0d87df6694964e89c7555842c099b, type: 2}
   - {fileID: 11400000, guid: cf0582765b1cdeb41b4f1a6648cf4f29, type: 2}
   - {fileID: 11400000, guid: 8d952115e526bc747a6c98e1e1d0b781, type: 2}
+  - {fileID: 11400000, guid: 1417c5b32ecd1d248a2941965ff5308c, type: 2}
 --- !u!1 &2112336383
 GameObject:
   m_ObjectHideFlags: 0
@@ -1251,3 +1300,4 @@ SceneRoots:
   - {fileID: 488956347}
   - {fileID: 3483358420245867946}
   - {fileID: 1876640079}
+  - {fileID: 1585739138}

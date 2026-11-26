@@ -15,3 +15,14 @@ MonoBehaviour:
   buildingName: Ice Drill
   size: {x: 2, y: 3}
   color: {r: 1, g: 0.504717, b: 0.8569921, a: 1}
+  cost:
+  - resource: {fileID: 11400000, guid: 5e5dc70652ce56f4e9555cdcdaae38cf, type: 2}
+    amount: 10
+  - resource: {fileID: 11400000, guid: b36a230677e745043ae4e54f461c9394, type: 2}
+    amount: 5
+  prefab: {fileID: 5242068169708488786, guid: dda48cac244b4d8469d6aa871f671607, type: 3}
+  workTime: 3
+  input: []
+  output:
+  - resource: {fileID: 11400000, guid: a62f7aa19e0a52f4db55e6681ae059f5, type: 2}
+    amount: 1

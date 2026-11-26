@@ -15,3 +15,12 @@ MonoBehaviour:
   buildingName: Capsule House
   size: {x: 2, y: 2}
   color: {r: 0.754717, g: 0.53842866, b: 0, a: 1}
+  cost:
+  - resource: {fileID: 11400000, guid: b36a230677e745043ae4e54f461c9394, type: 2}
+    amount: 10
+  - resource: {fileID: 11400000, guid: 5e5dc70652ce56f4e9555cdcdaae38cf, type: 2}
+    amount: 5
+  prefab: {fileID: 5242068169708488786, guid: f8361b7d6c96dc245b6194549292acb9, type: 3}
+  workTime: 3
+  input: []
+  output: []
