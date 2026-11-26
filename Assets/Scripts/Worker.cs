@@ -21,17 +21,88 @@ public class Worker : MonoBehaviour
     [SerializeField] private float restTime = 10f;
     private int trips;
     private float restTimer;
-    private Renderer body;
+    [SerializeField] private SpriteRenderer body;
+    
+    [SerializeField] private Sprite frontSprite;
+    [SerializeField] private Sprite backSprite;
+    [SerializeField] private Sprite sideSprite;
+
+    [SerializeField] private float hopHeight = 0.06f;
+    [SerializeField] private float hopsPerMeter = 2.5f;
+    private float hopPhase;
+    private float hopAmount;
+
+    private Transform cam;
 
     void Awake()
     {
+        cam = Camera.main.transform;
         agent = GetComponent<NavMeshAgent>();
-        body = GetComponent<Renderer>();
+        hopPhase = Random.Range(0f, 10f);
     }
 
     bool HasArrived()
     {
         return !agent.pathPending && agent.remainingDistance <= 0.5f;
+    }
+
+    void UpdateView()
+    {
+        Vector3 move = agent.velocity; 
+        move.y = 0;
+        if (move.sqrMagnitude < 0.01f) return;
+        
+        Vector3 camForward = cam.forward;
+        camForward.y = 0;
+        camForward.Normalize();
+        
+        Vector3 camRight = cam.right;
+        camRight.y = 0;
+        
+        float forwardAmount = Vector3.Dot(move, camForward);
+        float sideAmount = Vector3.Dot(move, camRight);
+
+        if (Mathf.Abs(forwardAmount) > Mathf.Abs(sideAmount))
+        {
+            if (forwardAmount > 0)
+            {
+                body.sprite = backSprite;
+            }
+            else
+            {
+                body.sprite = frontSprite;
+            }
+
+            body.flipX = false;
+        }
+        else
+        {
+            body.sprite = sideSprite;
+            body.flipX = sideAmount < 0;
+        }
+
+    }
+
+    void UpdateHop()
+    {
+        float speed = agent.velocity.magnitude;
+        hopPhase += speed * hopsPerMeter * Mathf.PI * Time.deltaTime;
+
+        float target = speed > 0.1f ? 1f : 0f;
+        hopAmount = Mathf.MoveTowards(hopAmount, target, 5f * Time.deltaTime);
+
+        float hop = Mathf.Abs(Mathf.Sin(hopPhase)) * hopHeight * hopAmount;
+        body.transform.localPosition = new Vector3(0f, hop, 0f);
+    }
+    
+    
+    void LateUpdate()
+    {
+        Vector3 faceDir = cam.forward;
+        faceDir.y = 0;
+        body.transform.rotation = Quaternion.LookRotation(faceDir);
+        UpdateView();
+        UpdateHop();
     }
 
     void UpdateIdle()
