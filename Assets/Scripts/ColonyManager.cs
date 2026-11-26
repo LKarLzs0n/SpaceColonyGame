@@ -5,6 +5,31 @@ public class ColonyManager : MonoBehaviour
 {
 
     private List<ProductionBuilding> workplaces = new List<ProductionBuilding>();
+    private List<Gatherable> markedGatherables = new List<Gatherable>();
+    
+    public void AddMarked(Gatherable g) {markedGatherables.Add(g);}
+    
+    public void RemoveMarked(Gatherable g) {markedGatherables.Remove(g);}
+
+    public Gatherable FindNearestMarked(Vector3 from)
+    {
+        Gatherable nearest = null;
+        float neareswtDistance = Mathf.Infinity;
+
+        foreach (Gatherable g in markedGatherables)
+        {
+            if (g.carrier != null) continue;
+
+            float distance = Vector3.Distance(from, g.transform.position);
+
+            if (distance < neareswtDistance)
+            {
+                nearest = g;
+                neareswtDistance = distance;
+            }
+        }
+        return nearest;
+    }
     
     public void AddWorkplace(ProductionBuilding workplace)
     {

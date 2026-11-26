@@ -105,7 +105,28 @@ public class BuildManager : MonoBehaviour
         {
             SelectBuilding(3);
         }
-        
+
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            selectedBuilding = null;
+            Debug.Log("Nothing selected");
+        }
+
+        if (selectedBuilding == null)
+        {
+            ghost.gameObject.SetActive(false);
+            if (Mouse.current.leftButton.wasPressedThisFrame && gridManager.TryGetMouseHit(out RaycastHit hit))
+            {
+                Gatherable g = hit.collider.GetComponent<Gatherable>();
+                if (g != null)
+                {
+                    g.ToggleMark();
+                    if (g.marked) {colony.AddMarked(g);}
+                    else {colony.RemoveMarked(g);}
+                }
+            }
+            return;
+        }
         
         if (gridManager.TryGetMouseCell(out Vector2Int cell))
         {

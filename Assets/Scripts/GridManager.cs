@@ -83,6 +83,12 @@ public class GridManager : MonoBehaviour
     {
         occupiedCells.Remove(cell);
     }
+
+    public bool TryGetMouseHit(out RaycastHit hit)
+    {
+        Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+        return Physics.Raycast(ray, out hit);
+    }
     
     public bool TryGetMouseCell(out Vector2Int cell)
     {
