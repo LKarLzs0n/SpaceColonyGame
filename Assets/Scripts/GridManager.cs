@@ -32,7 +32,53 @@ public class GridManager : MonoBehaviour
     {
         return occupiedCells.TryGetValue(cell, out building);
     }
-     
+
+    public Vector3 GetFootprintCenter(Vector2Int corner, Vector2Int size)
+    {
+        return new Vector3(
+            corner.x * cellSize + size.x * cellSize / 2f,
+            cellSize / 2f,
+            corner.y * cellSize + size.y * cellSize / 2f);
+    }
+
+    public void FreeArea(Vector2Int corner, Vector2Int size)
+    {
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int z = 0; z < size.y; z++)
+            {
+                Vector2Int c = corner + new Vector2Int(x, z);
+                FreeCell(c);
+            }
+        }
+    }
+
+    public bool IsAreaFree(Vector2Int corner, Vector2Int size)
+    {
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int z = 0; z < size.y; z++)
+            {
+                Vector2Int c = corner + new Vector2Int(x, z);
+                
+                if (!IsCellFree(c)) { return false; }
+            }
+        }
+        return true;
+    }
+
+    public void OccupyArea(Vector2Int corner, Vector2Int size, GameObject building)
+    {
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int z = 0; z < size.y; z++)
+            {
+                Vector2Int c = corner + new Vector2Int(x, z);
+                OccupyCell(c, building);
+            }
+        }
+    }
+    
     public void FreeCell(Vector2Int cell)
     {
         occupiedCells.Remove(cell);

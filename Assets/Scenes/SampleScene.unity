@@ -469,7 +469,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
   mainCamera: {fileID: 330585545}
   cellSize: 1
-  cubePrefab: {fileID: 5242068169708488786, guid: f8361b7d6c96dc245b6194549292acb9, type: 3}
 --- !u!4 &488956347
 Transform:
   m_ObjectHideFlags: 0
@@ -1034,6 +1033,11 @@ MonoBehaviour:
   gridManager: {fileID: 488956346}
   ghost: {fileID: 3483358420245867946}
   ghostSmoothing: 15
+  buildingPrefab: {fileID: 5242068169708488786, guid: f8361b7d6c96dc245b6194549292acb9, type: 3}
+  buildingCards:
+  - {fileID: 11400000, guid: 59c0d87df6694964e89c7555842c099b, type: 2}
+  - {fileID: 11400000, guid: cf0582765b1cdeb41b4f1a6648cf4f29, type: 2}
+  - {fileID: 11400000, guid: 8d952115e526bc747a6c98e1e1d0b781, type: 2}
 --- !u!1 &2112336383
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,40 +9,108 @@ public class BuildManager : MonoBehaviour
     [SerializeField] private float ghostSmoothing = 15f;
     [SerializeField] private GameObject buildingPrefab;
 
+    private BuildingData selectedBuilding;
+    [SerializeField] private BuildingData[] buildingCards;
 
+    private int rotationSteps;
+
+    void Start()
+    {
+        SelectBuilding(0);
+    }
+    
     void PlaceBuilding(Vector2Int cell)
     {
-        if (!gridManager.IsCellFree(cell)) return;
+        Vector2Int size = GetFootprintSize();
         
-        Vector3 position = gridManager.GetCellCenter(cell);
+        if (!gridManager.IsAreaFree(cell, size)) return;
         
-        GameObject building = Instantiate(buildingPrefab, position, Quaternion.identity);
-        gridManager.OccupyCell(cell, building);
+        Vector3 position = gridManager.GetFootprintCenter(cell, size);
+        
+        GameObject building = Instantiate(buildingPrefab, position, GetRotation());
+        building.name = selectedBuilding.buildingName;
+        building.transform.localScale = new Vector3(selectedBuilding.size.x, 1f, selectedBuilding.size.y);
+        building.GetComponent<Renderer>().material.color = selectedBuilding.color;
+        Building b = building.GetComponent<Building>();
+        b.data = selectedBuilding;
+        b.corner = cell;
+        b.size = size;
+        gridManager.OccupyArea(cell, size, building);
     }
 
     void RemoveBuilding(Vector2Int cell)
     {
         if (gridManager.TryGetBuilding(cell, out GameObject building))
         {
+            Building b = building.GetComponent<Building>();
+            gridManager.FreeArea(b.corner, b.size);
             Destroy(building);
-            gridManager.FreeCell(cell);
         }
     }
 
+    void SelectBuilding(int index)
+    {
+        if (index >= buildingCards.Length)  return;
+        selectedBuilding = buildingCards[index];
+        Debug.Log("Selected " + selectedBuilding.buildingName);
+    }
+
+    Vector2Int GetFootprintSize()
+    {
+        Vector2Int size = selectedBuilding.size;
+
+        if (rotationSteps % 2 == 1)
+        {
+            return new Vector2Int(size.y, size.x);
+        }
+
+        return size;
+    }
+
+    Quaternion GetRotation()
+    {
+        return Quaternion.Euler(0f, rotationSteps * 90f, 0f);
+    }
+    
+    
     void Update()
     {
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            rotationSteps = (rotationSteps + 1) % 4;
+        }
+        
+        if (Keyboard.current.digit1Key.wasPressedThisFrame)
+        {
+            SelectBuilding(0);
+        }
+
+        if (Keyboard.current.digit2Key.wasPressedThisFrame)
+        {
+            SelectBuilding(1);
+        }
+
+        if (Keyboard.current.digit3Key.wasPressedThisFrame)
+        {
+            SelectBuilding(2);
+        }
+        
         
         if (gridManager.TryGetMouseCell(out Vector2Int cell))
         {
             ghost.gameObject.SetActive(true);
-            
-            Vector3 target = gridManager.GetCellCenter(cell);
 
+            Vector2Int corner = cell - GetFootprintSize() / 2;
+            
+            Vector3 target = gridManager.GetFootprintCenter(corner, GetFootprintSize());
+
+            ghost.localScale = new Vector3(selectedBuilding.size.x, 1f, selectedBuilding.size.y) * 1.02f;
             ghost.position = Vector3.Lerp(ghost.position, target, ghostSmoothing * Time.deltaTime);
+            ghost.rotation = Quaternion.Slerp(ghost.rotation, GetRotation(), ghostSmoothing * Time.deltaTime);
             
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {
-                PlaceBuilding(cell);
+                PlaceBuilding(corner);
             }
 
             if (Mouse.current.rightButton.wasPressedThisFrame)
