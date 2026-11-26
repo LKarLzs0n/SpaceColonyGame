@@ -13,6 +13,7 @@
 
 ## Why this exists
 **Hack Club entry for the Osaka, Japan trip.** Solo. ~11 hours of coding a week, tracked with **Hackatime**. Deadline: **early February 2027**. It has to be a GOOD game to get confirmed.
+- **Art time counts too, up to 30% of the project's total.** Track modelling/art with **Lapse** (lapse.hackclub.com), attached to this game's Hackatime project. So every 7 h of code lets ~3 h of art count (11 h code a week ≈ 4.7 h of art). Art beyond that doesn't count, so code stays the main thing.
 
 ## The game
 A **cozy space colony builder** in Unity (C#, URP), built on **real-life science**: real ores, real chemistry, real astrophysics. It should make sense.
@@ -39,6 +40,18 @@ A **cozy space colony builder** in Unity (C#, URP), built on **real-life science
 - Smooth and dreamy: the camera eases, nothing snaps, soft cozy music, quiet UI.
 - **Camera:** angled top-down. WASD pan, scroll zoom, Q/E rotate. Zoomed far out, the colony is one glowing speck in the dark.
 
+## The big picture (locked 2026-11-26)
+**The heartbeat, running all game:** place a building → workers walk and carry → the depot fills → spend it on more town. **The layout is the puzzle** (short walks = a faster town). **The ring is why you keep going:** each part needs a longer chain, and pays you back with something you see and hear.
+
+One playthrough (times are guesses, tune them at the playtest):
+| Time | What you do | What you get |
+|---|---|---|
+| 0 min | The pod lands; 2 people grab crates and rocks | The first houses, more people move in |
+| ~5 min | The town wakes up: ice drill, farm, food | A rusty boulder: iron ore, the mine unlocks |
+| ~10 min | First chains: iron, carbon, copper, wire | **Ring part 1, the base:** the floor glows, a beat joins the music |
+| ~30 min | Steel and motors, upgrades, tighter alleys | **Ring part 2, the laser towers:** the dome seals, the first rain |
+| ~1 h | Silicon and chips: quartz, arc furnace, chip fab | **Ring part 3, the first flash:** a pulse lights the sky. The February build ends here |
+
 ## How the town works (core loop)
 1. Houses give colonists. Each colonist gets a job at a building with a free worker slot.
 2. Workers **walk** (NavMesh) from home to work.
@@ -48,14 +61,27 @@ A **cozy space colony builder** in Unity (C#, URP), built on **real-life science
 6. Workers carry materials to the **ring** to build it.
 - **The layout is the cozy puzzle:** short walks = a faster town. Mines near depots, houses near work, so the town packs into tight alleys on its own.
 - **No conveyors.** If something runs short, workers wait and buildings pause. Nothing breaks, nobody leaves.
-- **Food:** farms → depot; colonists eat from the stockpile; no food = no new colonists. **Power:** generators add to one number; buildings past the first few use it.
+- **Food:** farms → depot; colonists eat from the stockpile; no food = no new colonists. **Power:** generators add to one number; buildings past the first few use it. The landing pod gives a little starting power, enough for the first farm before the generator unlocks.
+
+## The opening (the first ~10 minutes)
+- The landing pod touches down in the dark with **2 colonists**. Around it lie **cargo crates** (food + scrap metal), **grey boulders** (rock) and **ice chunks**. No trees: it's an asteroid.
+- You click things to **mark** them; idle colonists walk over and carry them to the pod (the first storage).
+- Rock + scrap → the first capsule house → more colonists → a depot and an ice drill → water → the farm.
+- Someone hauls in a **rusty red boulder**: "Iron ore discovered!" and the iron mine unlocks. From there the chains take over.
+- Gathering by hand needs workers, so it gets built in phase 3 together with the `Worker`.
+
+## Unlocks: discover it, unlock it
+- **At the start:** the landing pod (already standing, gives a little power), capsule house, storage depot, ice drill, and all the decor.
+- **The first time a material reaches a depot, every building that uses it unlocks:** water → hydroponics farm; iron ore (hematite, rusty red) → iron mine + smelter; carbon (black) → carbon pit + generator; copper ore (chalcopyrite, brassy) → copper mine; copper → wire mill.
+- New ores first show up as boulders lying around the colony, in their real colours, so you find them by looking around.
+- **The ring's parts unlock the big tiers:** part 1 → steel mill + motor works; part 2 → quartz quarry, arc furnace, chip fab.
 
 ## Buildings (February build)
 - Every building has **3 levels**, and each level is its own Blockbench model (small → bigger → glowing neon). Upgrading = more worker slots and faster work. Upgrades are the main reward.
-- **From the start:** landing pod, capsule house, storage depot, ice drill, hydroponics farm, iron mine, carbon pit, smelter (my furnace model), copper mine, wire mill, generator.
+- **Base buildings (some at the start, the rest discovered, see Unlocks):** landing pod, capsule house, storage depot, ice drill, hydroponics farm, iron mine, carbon pit, smelter (my furnace model), copper mine, wire mill, generator.
 - **Unlocked by ring part 1:** steel mill, motor works.
 - **Unlocked by ring part 2:** quartz quarry, arc furnace, chip fab.
-- **Decor (vibe only):** neon signs, paper lanterns, vending machines, noodle stand, utility poles with tangled cables.
+- **Decor (vibe only):** neon signs, paper lanterns, vending machines, noodle stand, utility poles with tangled cables. Available from the start and cheap, so the town looks cozy early.
 - **After February:** mass driver (trade), research lab.
 - **Modelling order:** level 1 of every building first (in the order above), then all the level 2s, then the level 3s. Same footprint for all 3 levels: they grow up, never out. Reserve 4 Minecraft blocks only for neon (pink, cyan, green, amber) so exactly those can glow in Unity.
 - **Grid: fine and invisible (decided 2026-11-24).** 1 cell = **1 Minecraft block** (16 Blockbench units = 1 Unity unit; check the FBX import scale), so placing feels almost free but voxel buildings always line up, pixel edge to pixel edge. Footprints can be any whole number of blocks (a 5×7 noodle shop is fine). The grid only shows while placing. Buildings rotate in 90° steps (R key; Q/E is the camera). The ghost glides to the snapped spot with `Lerp`, so snapping feels free. Decor (signs, cables, lanterns, steam) hangs over the edges to break up the boxes. Not fully free placement: voxel buildings at odd angles clash, and tight alleys need buildings flush.
@@ -79,33 +105,38 @@ The big build in the town centre, like a Wonder. Workers carry materials to it. 
 ## Code architecture
 **Data (ScriptableObjects), so new content needs no new code:**
 - `ResourceData`: name, icon
-- `BuildingData`: name, grid size, unlocked by (ring part), and per level: model, build cost, worker slots, power, inputs/outputs per cycle, work time
+- `BuildingData`: name, grid size, placeholder colour, unlocked by (a discovered resource or a ring part), and per level: model, build cost, worker slots, power, inputs/outputs per cycle, work time
 
 **Scripts, in the order I'll write them:**
 1. `CameraController`: pan, zoom, rotate, smooth easing ✓
 2. `GridManager`: mouse → grid cell, free/occupied cells (`Dictionary<Vector2Int, GameObject>`). A cell is one block; a building fills every cell under its footprint.
 3. `BuildManager`: pick a building, ghost preview, place if affordable
-4. `Stockpile`: amounts of each resource, fires an event when it changes (for UI)
+4. `Stockpile`: amounts of each resource, fires an event when it changes (for UI), and remembers which resources it has ever seen (for unlocks)
 5. `Building` (base class): level, upgrade, worker slots, pause when short
 6. `ProductionBuilding`: inputs → work time → outputs (first on a plain timer, before workers exist)
 7. `House`: adds colonist space
 8. `ColonyManager`: colonists, food, gives each colonist a job
 9. **`Worker`: the heart of the game.** A `NavMeshAgent` + a state machine (walk to work → work → carry to depot → fetch inputs → ...), the code limb swing and the lantern. I've built state machines + NavMesh before in an RTS, so build on that.
-10. `RingProject`: the 3 parts, takes deliveries, what changes when each is done, unlocks
-11. `PlanetVisual`: a code-built planet that slowly turns
+10. `Gatherable`: crates, boulders and ice chunks for the opening; click to mark, idle workers carry them in
+11. `RingProject`: the 3 parts, takes deliveries, what changes when each is done, unlocks
+12. `PlanetVisual`: a code-built planet that slowly turns
 - UI: resource bar, build menu, building info panel
 
-## Week by week
-1. Nov 24–30: the camera ✓, grid + placing/removing cubes ✓ (both done on day 1, ahead of schedule)
-2. Dec 1–7: `BuildingData`, real models, ghost preview, costs ← **current** (started early)
-3. Dec 8–14: stockpile, production buildings on a timer (no workers yet), resource bar
-4. Dec 15–21: houses, colonists, **workers**: NavMesh walking + the state machine (to work, work, carry to the depot)
-5. Dec 22 – Jan 4 (holidays, lighter): processors fetching inputs (the chains), upgrades, build menu
-6. Jan 5–11: the ring: 3 parts, workers deliver to it, unlocks
-7. Jan 12–18: food + power, the little people's look (blocky figures, limb swing, lanterns)
-8. Jan 19–25: vibe pass (lighting, bloom, neon, rain, code planets, music)
-9. Jan 26 – Feb 1: save/load, friends playtest, tuning (ring part 1 under 10 minutes)
-10. Feb 2–6: polish, build, itch page, last devlog, submit
+## Roadmap: mechanics first (locked 2026-11-26)
+**Rules:**
+- Every building is a **coloured placeholder cube** (one colour per type) until phase 5.
+- **No real UI until phase 5:** debug text on screen is enough.
+- Models get made alongside the code in Blockbench (tracked in Lapse, art ≤30%), but they only go into the game in phase 5.
+- Goal: by early January the whole playthrough (see The big picture) plays from start to end with ugly cubes.
+
+**Phases:**
+1. **Building** (Nov 24 – Dec 3): the camera ✓, grid + placing/removing ✓, ghost ✓. Next: `BuildManager` takes over placing, `BuildingData` (name, size, colour, cost), footprints, R rotate, number keys 1–5 pick a building. ← **current**
+2. **Economy** (Dec 4–14): `ResourceData`, `Stockpile`, costs, `ProductionBuilding` on a plain timer (no workers yet), debug text for the amounts.
+3. **The living town** (Dec 15 – Jan 4, holidays lighter): `House`, `ColonyManager`, **`Worker`** (NavMesh + state machine), depots, processors fetching inputs (the chains), the opening (`Gatherable`: marking crates and boulders), discover-to-unlock.
+4. **The goal** (Jan 5–11): `RingProject` (3 parts, deliveries, unlocks), upgrades, food + power.
+5. **Make it beautiful** (Jan 12–25): real models, build menu, resource bar, the little people's look (blocky figures, limb swing, lanterns), neon, bloom, rain, code planets, music.
+6. **Ship it** (Jan 26 – Feb 6): save/load, friends playtest, tuning (ring part 1 under 10 minutes), itch page, last devlog, submit.
+
 Stretch only if ahead: drones, shuttles landing with colonists, mass driver trade.
 
 ## Current task details
@@ -133,3 +164,4 @@ Stretch only if ahead: drones, shuttles landing with colonists, mass driver trad
 ## Progress log
 (Update this section at the end of each session: what got done, what's next.)
 - **2026-11-24:** Planned the game and pivoted from factory tycoon to cozy space colony builder. Modelled the furnace (v3, final) in Minecraft, painted and exported it to FBX. No code yet. Then: made the Unity project `SpaceColonyGame` (6000.5.6f1, URP), Git + GitHub repo (public: https://github.com/LKarLzs0n/SpaceColonyGame), and wrote **CameraController**: WASD pan (normalized, smoothed), Q/E rotate, scroll zoom (smoothed, clamped). Learned: camera rig, `position` vs `localPosition`, `Time.deltaTime`, `normalized`, `Mathf.Clamp`, `Lerp` for ease-out. Posted devlog #1 on Hack Club (Build Mode pipeline screenshot + camera clip). Later the same day, the design became **a living town**: little people walk, carry and work (NavMesh + a worker state machine), every building feeds the next through storage depots, and the ring is a 3-part Wonder that unlocks new buildings. Classes and research were dropped; rain under the dome was added. The grid became fine and invisible (1 cell = 1 block). Then wrote **GridManager**: click to place cubes snapped to the grid, right-click to remove, side clicks fixed. Learned: raycasts, `out` parameters and the `TryGet` pattern, early `return`, `Dictionary` (`Add`, `ContainsKey`, `TryGetValue`, `Remove`), `Mathf.FloorToInt` vs `(int)` on negatives, `hit.normal`, and the if-without-braces trap. Then started **BuildManager**: a see-through ghost cube glides to the cell under the mouse. Learned: one script calling another (`public` methods + a `[SerializeField]` script slot), returning a value from a method, `SetActive`, a transparent URP material, and why visuals shouldn't have colliders. **Next:** move placing into `BuildManager` (see Current task details), then `BuildingData` + the furnace on the grid.
+- **2026-11-26:** Wrote devlog #2 and set up Lapse for art time. Locked the big picture: the heartbeat loop, one playthrough from the pod to the ring's first flash, the opening (2 colonists gather crates and boulders), discover-to-unlock, and the mechanics-first roadmap (6 phases, placeholder cubes until phase 5). No code. **Next:** still moving placing into `BuildManager`.

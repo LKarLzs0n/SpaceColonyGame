@@ -7,49 +7,9 @@ public class GridManager : MonoBehaviour
     
     [SerializeField] private Camera mainCamera;
     [SerializeField] private float cellSize = 1f;
-    [SerializeField] private GameObject cubePrefab;
     
     private Dictionary<Vector2Int, GameObject> occupiedCells = new Dictionary<Vector2Int, GameObject>();
     
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            PlaceCube();
-        }
-
-        if (Mouse.current.rightButton.wasPressedThisFrame)
-        {
-            RemoveCube();
-        }
-    }
-
-    void PlaceCube()
-    {
-
-        if (!TryGetMouseCell(out Vector2Int cell)) return;
-
-        if (occupiedCells.ContainsKey(cell)) return;
-        
-        Vector3 position = GetCellCenter(cell);
-        
-        GameObject cube = Instantiate(cubePrefab, position, Quaternion.identity);
-        occupiedCells.Add(cell, cube);
-
-    }
-
-    void RemoveCube()
-    {
-        if (!TryGetMouseCell(out Vector2Int cell)) return;
-        if (occupiedCells.TryGetValue(cell, out GameObject cube))
-        {
-            Destroy(cube);
-            occupiedCells.Remove(cell);
-        }
-    }
-
     public Vector3 GetCellCenter(Vector2Int cell)
     {
         return new Vector3(
@@ -58,6 +18,26 @@ public class GridManager : MonoBehaviour
             cell.y * cellSize + cellSize / 2f);
     }
 
+    public bool IsCellFree(Vector2Int cell)
+    {
+        return !occupiedCells.ContainsKey(cell);
+    }
+     
+    public void OccupyCell(Vector2Int cell, GameObject building)
+    {
+        occupiedCells.Add(cell, building);
+    }
+     
+    public bool TryGetBuilding(Vector2Int cell, out GameObject building)
+    {
+        return occupiedCells.TryGetValue(cell, out building);
+    }
+     
+    public void FreeCell(Vector2Int cell)
+    {
+        occupiedCells.Remove(cell);
+    }
+    
     public bool TryGetMouseCell(out Vector2Int cell)
     {
         Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
